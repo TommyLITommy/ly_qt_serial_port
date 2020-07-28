@@ -258,6 +258,13 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="pushButton_7">
+          <property name="text">
+           <string>flash操作</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>

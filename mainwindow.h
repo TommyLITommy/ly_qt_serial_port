@@ -16,6 +16,9 @@
 #include "lcd.h"
 #include "protocol.h"
 #include "mythread.h"
+#include "flash_operation.h"
+#include "flash.h"
+#include "ble_protocol.h"
 
 namespace Ui {
 class MainWindow;
@@ -46,6 +49,10 @@ public slots:
     void on_lcd_display_window_closed();
     void on_lcd_picture_id_received(int id);
     void timer2_timeout_handler();
+    void on_pushButton_7_clicked();
+    void on_flash_operation_closed();
+    void on_flash_operation_id_received(int id, QString str, void*);
+    void write_flash_timer_timeout_handler();
 
 private:
     Ui::MainWindow *ui;
@@ -61,11 +68,16 @@ private:
     QTimer *timer;
     QTimer *timer2;
     int timer_id;
+    flash *p_flash;
+    ble_protocol *p_ble_protocol;
+    QTimer *write_flash_timer;
+
 
 private:
     static nine_axis_visualization *nine_axis;
     static six_axis_visualization *six_axis;
     static LcdDisplay *lcd_display;
+    //static flash_operation *m_flash_operation;
 
 protected:
     void keyPressEvent (QKeyEvent *e);
@@ -74,6 +86,10 @@ signals:
     void sendSerialDataToChild(QString str);
 private slots:
     void on_textBrowser_textChanged();
+
+private:
+    QByteArray flash_data;
+    int send_index;
 };
 
 #endif // MAINWINDOW_H

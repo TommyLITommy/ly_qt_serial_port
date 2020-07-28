@@ -25,10 +25,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        blecentral.cpp \
+        ble_central.cpp \
+        ble_peripheral.cpp \
+        ble_protocol.cpp \
         childwindow.cpp \
+        flash.cpp \
+        flash_operation.cpp \
         lcd.cpp \
         lcddisplay.cpp \
+        ly_util.cpp \
         mainwindow.cpp \
         mythread.cpp \
         nine_axis_visualization.cpp \
@@ -40,18 +45,23 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     analog_clock.h \
     bind_success.h \
-    blecentral.h \
+    ble_central.h \
+    ble_peripheral.h \
+    ble_protocol.h \
     blood_pressure.h \
     car_bind.h \
     car_tire_pressure..h \
     charging.h \
     childwindow.h \
     clock_01.h \
+    flash.h \
+    flash_operation.h \
     heart_rate.h \
     incoming_call.h \
     is_binding.h \
     lcd.h \
     lcddisplay.h \
+    ly_util.h \
     motor_bind.h \
     motor_tire_pressure.h \
     mythread.h \
@@ -71,8 +81,10 @@ HEADERS  += mainwindow.h \
     wechat.h
 
 FORMS    += mainwindow.ui \
-    blecentral.ui \
+    ble_central.ui \
+    ble_peripheral.ui \
     childwindow.ui \
+    flash_operation.ui \
     lcddisplay.ui \
     nine_axis_visualization.ui \
     six_axis_visualization.ui

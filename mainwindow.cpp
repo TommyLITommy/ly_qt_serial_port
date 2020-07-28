@@ -25,6 +25,10 @@
 #include <QLineSeries>
 #include <QValueAxis>
 #include <six_axis_visualization.h>
+#include "flash.h"
+#include "ble_protocol.h"
+#include <QFile>
+#include <QFileInfo>
 
 using namespace QtCharts;
 
@@ -83,6 +87,12 @@ MainWindow::MainWindow(QWidget *parent) :
     timer2 = new QTimer(this);
     //connect(timer, SIGNAL(timeout()), this, SLOT(timer2_timeout_handler()));
 #endif
+
+    p_ble_protocol = new ble_protocol(p_protocol);
+    p_flash = new flash(p_ble_protocol);
+
+    write_flash_timer = new QTimer(this);
+    connect(write_flash_timer, SIGNAL(timeout()), this, SLOT(write_flash_timer_timeout_handler()));
 }
 
 MainWindow::~MainWindow()
@@ -672,4 +682,86 @@ void MainWindow::timer2_timeout_handler()
 void MainWindow::on_textBrowser_textChanged()
 {
     ui->textBrowser->moveCursor(QTextCursor::End);
+}
+
+flash_operation *m_flash_operation = nullptr;
+
+ble_device_info_t ble_device_info;
+
+void MainWindow::on_flash_operation_id_received(int id, QString str, void *parameter)
+{
+    qDebug()<<"flash_operation_id:"<<id<<",str:"<<str;
+
+    ble_device_info.conn_handle = 0x16;
+    ble_device_info.mac_address[0] = 0x11;
+    ble_device_info.mac_address[1] = 0x22;
+    ble_device_info.mac_address[2] = 0x11;
+    ble_device_info.mac_address[3] = 0x22;
+    ble_device_info.mac_address[4] = 0x44;
+    ble_device_info.mac_address[5] = 0x55;
+
+    switch(id)
+    {
+        case 1://erase
+            p_flash->flash_erase(0, 0x202000, 0x1F4000, DESTINATION_REMOTE_DEVICE, &ble_device_info);
+            break;
+        case 2://read
+            p_flash->flash_read(0, 0x202000, 0x10, DESTINATION_REMOTE_DEVICE, &ble_device_info);
+            break;
+        case 3://write
+            qDebug()<<"flash write";
+            QFile file(str);
+            file.open(QIODevice::ReadOnly);
+            flash_data = file.readAll();
+            QFileInfo info(file);
+            qDebug()<<"file size:"<<info.size();
+            file.close();
+            write_flash_timer->stop();
+            write_flash_timer->start(100);
+            break;
+    }
+}
+
+void MainWindow::on_flash_operation_closed()
+{
+    m_flash_operation = nullptr;
+}
+
+void MainWindow::on_pushButton_7_clicked()
+{
+    qDebug()<<"void on_pushButton_7_clicked()";
+    if(m_flash_operation == nullptr)
+    {
+        m_flash_operation = new flash_operation();
+        connect(m_flash_operation, SIGNAL(destroyed()), this, SLOT(on_flash_operation_closed()));
+        connect(m_flash_operation, SIGNAL(send_flash_operation_id(int, QString, void *)), this, SLOT(on_flash_operation_id_received(int, QString, void*)));
+        m_flash_operation->show();
+    }
+}
+
+void MainWindow::write_flash_timer_timeout_handler()
+{
+    int send_length;
+
+    qDebug()<<"write_flash_timer_timeout_handler";
+
+    if(send_index >= flash_data.size())
+    {
+        write_flash_timer->stop();
+    }
+
+    if((send_index + 200) <= flash_data.size())
+    {
+        send_length = 200;
+    }
+    else
+    {
+        send_length = flash_data.size() - send_index;
+    }
+
+    uint8_t *p = (uint8_t *)flash_data.data();
+
+    p_flash->flash_write(0, 0x202000 + send_index, send_length, p + send_index, DESTINATION_REMOTE_DEVICE, &ble_device_info);
+
+    send_index += send_length;
 }

@@ -1,8 +1,9 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <QDebug>
 #include "protocol.h"
+#include "ly_util.h"
 
 protocol::protocol()
 {
@@ -14,21 +15,21 @@ protocol::protocol(QSerialPort *s)
     serial = s;
 }
 
-uint16_t protocol::crc16_checksum(uint8_t const *p_data, uint32_t size, uint16_t const *p_crc)
-{
-    uint16_t crc = (p_crc == NULL) ? 0xFFFF : *p_crc;
+//uint16_t protocol::crc16_checksum(uint8_t const *p_data, uint32_t size, uint16_t const *p_crc)
+//{
+//    uint16_t crc = (p_crc == NULL) ? 0xFFFF : *p_crc;
 
-    for (uint32_t i = 0; i < size; i++)
-    {
-        crc  = (uint8_t)(crc >> 8) | (crc << 8);
-        crc ^= p_data[i];
-        crc ^= (uint8_t)(crc & 0xFF) >> 4;
-        crc ^= (crc << 8) << 4;
-        crc ^= ((crc & 0xFF) << 4) << 1;
-    }
+//    for (uint32_t i = 0; i < size; i++)
+//    {
+//        crc  = (uint8_t)(crc >> 8) | (crc << 8);
+//        crc ^= p_data[i];
+//        crc ^= (uint8_t)(crc & 0xFF) >> 4;
+//        crc ^= (crc << 8) << 4;
+//        crc ^= ((crc & 0xFF) << 4) << 1;
+//    }
 
-    return crc;
-}
+//    return crc;
+//}
 
 void protocol::assemble_command_and_send(uint8_t group_id, uint8_t command_id, uint8_t *p_payload, uint16_t payload_length)
 {
